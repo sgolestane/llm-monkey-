@@ -64,3 +64,18 @@ llm-monkey:
     database-enabled: true
     cache-enabled: true
     rate-limit-enabled: true
+  k8s-auth:
+    enabled: false
+    # audience: "llm-monkey"
+    # api-server-url: "https://kubernetes.default.svc"
+    # ca-cert-path: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    # service-account-token-path: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    # token-cache-ttl-seconds: 30
+    # allowlist:
+    #   - namespace: "billing"
+    #     service-account: "billing-api"
+    #     permissions:
+    #       - path-pattern: "/v1/chat/completions"
+    #         methods: ["POST"]
+    #       - path-pattern: "/v1/models"
+    #         methods: ["GET"]

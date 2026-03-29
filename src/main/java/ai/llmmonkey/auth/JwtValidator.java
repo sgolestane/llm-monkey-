@@ -62,7 +62,9 @@ public class JwtValidator {
                     role,
                     null,    // maxBudget
                     null,    // tpmLimit
-                    null     // rpmLimit
+                    null,    // rpmLimit
+                    null,    // k8sNamespace
+                    null     // k8sServiceAccount
             );
 
             return Optional.of(ctx);
