@@ -20,4 +20,16 @@ public interface SpendLogRepository extends JpaRepository<SpendLogEntity, String
 
     @Query("SELECT COALESCE(SUM(s.spend), 0) FROM SpendLogEntity s WHERE s.apiKeyHash = :apiKeyHash AND s.startTime >= :startTime")
     BigDecimal sumSpendByApiKeyHashAndStartTimeAfter(@Param("apiKeyHash") String apiKeyHash, @Param("startTime") Instant startTime);
+
+    @Query(value = "SELECT * FROM spend_logs WHERE :tag = ANY(tags) ORDER BY created_at DESC", nativeQuery = true)
+    List<SpendLogEntity> findByTag(@Param("tag") String tag);
+
+    @Query(value = "SELECT * FROM spend_logs WHERE :tag = ANY(tags) AND created_at >= :since ORDER BY created_at DESC", nativeQuery = true)
+    List<SpendLogEntity> findByTagAndCreatedAtAfter(@Param("tag") String tag, @Param("since") Instant since);
+
+    @Query(value = "SELECT COALESCE(SUM(spend), 0) FROM spend_logs WHERE :tag = ANY(tags)", nativeQuery = true)
+    BigDecimal sumSpendByTag(@Param("tag") String tag);
+
+    @Query(value = "SELECT COALESCE(SUM(spend), 0) FROM spend_logs WHERE :tag = ANY(tags) AND created_at >= :since", nativeQuery = true)
+    BigDecimal sumSpendByTagAndCreatedAtAfter(@Param("tag") String tag, @Param("since") Instant since);
 }

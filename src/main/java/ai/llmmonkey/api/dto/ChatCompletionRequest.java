@@ -24,7 +24,8 @@ public record ChatCompletionRequest(
         Boolean logprobs,
         @JsonProperty("top_logprobs") Integer topLogprobs,
         @JsonProperty("stream_options") StreamOptions streamOptions,
-        Map<String, Object> metadata
+        Map<String, Object> metadata,
+        List<String> tags
 ) {
     public record Tool(String type, Function function) {
         public record Function(String name, String description, Map<String, Object> parameters) {}

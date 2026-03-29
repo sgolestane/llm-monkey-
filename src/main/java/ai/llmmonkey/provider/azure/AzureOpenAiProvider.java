@@ -115,7 +115,7 @@ public final class AzureOpenAiProvider implements LlmProvider {
                 request.maxTokens(), request.presencePenalty(), request.frequencyPenalty(),
                 request.user(), request.tools(), request.toolChoice(), request.responseFormat(),
                 request.seed(), request.logprobs(), request.topLogprobs(),
-                stream ? request.streamOptions() : null, request.metadata()
+                stream ? request.streamOptions() : null, request.metadata(), request.tags()
         );
     }
 }

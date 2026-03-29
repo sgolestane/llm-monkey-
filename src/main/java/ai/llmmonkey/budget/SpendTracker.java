@@ -7,11 +7,14 @@ import ai.llmmonkey.repository.TeamRepository;
 import ai.llmmonkey.repository.OrganizationRepository;
 import ai.llmmonkey.repository.UserRepository;
 
+import ai.llmmonkey.repository.TagBudgetRepository;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,23 +25,35 @@ public class SpendTracker {
     private final TeamRepository teamRepository;
     private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
+    private final TagBudgetRepository tagBudgetRepository;
 
     public SpendTracker(SpendLogRepository spendLogRepository,
                         VerificationTokenRepository verificationTokenRepository,
                         TeamRepository teamRepository,
                         OrganizationRepository organizationRepository,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        TagBudgetRepository tagBudgetRepository) {
         this.spendLogRepository = spendLogRepository;
         this.verificationTokenRepository = verificationTokenRepository;
         this.teamRepository = teamRepository;
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
+        this.tagBudgetRepository = tagBudgetRepository;
     }
 
     @Async
     public void recordSpend(String apiKeyHash, String userId, UUID teamId, UUID orgId,
                             String model, String provider, BigDecimal cost,
                             int promptTokens, int completionTokens, long durationMs) {
+        recordSpend(apiKeyHash, userId, teamId, orgId, model, provider, cost,
+                promptTokens, completionTokens, durationMs, null);
+    }
+
+    @Async
+    public void recordSpend(String apiKeyHash, String userId, UUID teamId, UUID orgId,
+                            String model, String provider, BigDecimal cost,
+                            int promptTokens, int completionTokens, long durationMs,
+                            List<String> tags) {
         SpendLogEntity log = new SpendLogEntity();
         log.setApiKeyHash(apiKeyHash);
         log.setUserId(userId);
@@ -51,6 +66,9 @@ public class SpendTracker {
         log.setCompletionTokens(completionTokens);
         log.setRequestDurationMs((int) durationMs);
         log.setCreatedAt(Instant.now());
+        if (tags != null && !tags.isEmpty()) {
+            log.setTags("{" + String.join(",", tags) + "}");
+        }
         spendLogRepository.save(log);
 
         // Update spend on verification token
@@ -85,6 +103,18 @@ public class SpendTracker {
                 user.setSpend(currentSpend.add(cost));
                 userRepository.save(user);
             });
+        }
+
+        // Update spend on tag budgets
+        if (tags != null && !tags.isEmpty()) {
+            for (String tag : tags) {
+                tagBudgetRepository.findByTag(tag).ifPresent(tagBudget -> {
+                    BigDecimal currentSpend = tagBudget.getCurrentSpend() != null
+                            ? tagBudget.getCurrentSpend() : BigDecimal.ZERO;
+                    tagBudget.setCurrentSpend(currentSpend.add(cost));
+                    tagBudgetRepository.save(tagBudget);
+                });
+            }
         }
     }
 }

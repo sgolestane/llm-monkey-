@@ -16,5 +16,7 @@ public record CompletionRequest(
         @JsonProperty("presence_penalty") Double presencePenalty,
         @JsonProperty("frequency_penalty") Double frequencyPenalty,
         String user,
-        Integer seed
+        Integer seed,
+        java.util.Map<String, Object> metadata,
+        java.util.List<String> tags
 ) {}

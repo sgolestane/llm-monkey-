@@ -26,7 +26,7 @@ public class CompletionController {
                 request.model(), messages, request.temperature(), request.topP(),
                 request.n(), false, request.stop(), request.maxTokens(),
                 request.presencePenalty(), request.frequencyPenalty(),
-                request.user(), null, null, null, request.seed(), null, null, null, null
+                request.user(), null, null, null, request.seed(), null, null, null, request.metadata(), request.tags()
         );
         return router.routeChatCompletion(chatRequest);
     }
