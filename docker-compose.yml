@@ -1,0 +1,45 @@
+services:
+  app:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/llmmonkey
+      SPRING_DATASOURCE_USERNAME: llmmonkey
+      SPRING_DATASOURCE_PASSWORD: llmmonkey
+      SPRING_DATA_REDIS_HOST: redis
+      LLM_MONKEY_MASTER_KEY: sk-master-1234
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: llmmonkey
+      POSTGRES_USER: llmmonkey
+      POSTGRES_PASSWORD: llmmonkey
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U llmmonkey"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
