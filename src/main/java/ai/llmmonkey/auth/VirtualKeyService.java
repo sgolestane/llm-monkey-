@@ -76,7 +76,9 @@ public class VirtualKeyService {
                         UserRole.TEAM_MEMBER,
                         entity.getMaxBudget(),
                         entity.getTpmLimit(),
-                        entity.getRpmLimit()
+                        entity.getRpmLimit(),
+                        null,
+                        null
                 ));
     }
 

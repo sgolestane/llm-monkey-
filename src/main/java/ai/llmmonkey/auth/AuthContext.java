@@ -13,6 +13,8 @@ public record AuthContext(
         UserRole role,
         BigDecimal maxBudget,
         Long tpmLimit,
-        Long rpmLimit
+        Long rpmLimit,
+        String k8sNamespace,
+        String k8sServiceAccount
 ) {
 }
