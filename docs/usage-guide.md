@@ -490,9 +490,20 @@ curl http://localhost:4000/v1/chat/completions \
 
 Tags work on all endpoints: `/v1/chat/completions`, `/v1/completions`, and `/v1/embeddings`.
 
+**Important: Tags are global.** If multiple services use the same tag (e.g., `project-alpha`), their spend is aggregated together. Tag budgets, spend reports, and Prometheus metrics are all shared across every service using that tag. This is useful for cross-cutting cost attribution (e.g., total spend for a project regardless of which service made the call), but means a tag budget is consumed by all services that send that tag.
+
+If you need per-service visibility within a shared tag, use multiple tags per request:
+
+```json
+"tags": ["project-alpha", "billing-service", "billing-service:project-alpha"]
+```
+
+This gives you three reporting dimensions: by project, by service, and by the intersection.
+
 **Tagging best practices:**
-- Use consistent naming conventions (e.g., `project-<name>`, `team-<name>`, `feature-<name>`)
-- Tag by both project and feature for multi-dimensional reporting
+- Use consistent naming conventions (e.g., `project-<name>`, `team-<name>`, `service-<name>`)
+- Tag by both project and service for multi-dimensional reporting
+- Use composite tags (e.g., `billing-service:project-alpha`) when you need per-service breakdowns within a shared project tag
 - Keep tag cardinality reasonable (dozens to hundreds, not thousands)
 
 ### Spend Reporting by Tag
