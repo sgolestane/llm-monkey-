@@ -61,6 +61,9 @@ public class SpendLogEntity {
     @Column(name = "metadata", columnDefinition = "jsonb")
     private String metadata;
 
+    @Column(name = "tags", columnDefinition = "text[]")
+    private String tags;
+
     @Column(name = "cache_hit")
     private boolean cacheHit;
 
@@ -209,6 +212,14 @@ public class SpendLogEntity {
 
     public void setMetadata(String metadata) {
         this.metadata = metadata;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
     public boolean isCacheHit() {

@@ -120,7 +120,8 @@ public final class OpenAiProvider implements LlmProvider {
                 request.topP(), request.n(), false, request.stop(),
                 request.maxTokens(), request.presencePenalty(), request.frequencyPenalty(),
                 request.user(), request.tools(), request.toolChoice(), request.responseFormat(),
-                request.seed(), request.logprobs(), request.topLogprobs(), null, request.metadata()
+                request.seed(), request.logprobs(), request.topLogprobs(), null, request.metadata(),
+                request.tags()
         );
     }
 
@@ -131,7 +132,7 @@ public final class OpenAiProvider implements LlmProvider {
                 request.maxTokens(), request.presencePenalty(), request.frequencyPenalty(),
                 request.user(), request.tools(), request.toolChoice(), request.responseFormat(),
                 request.seed(), request.logprobs(), request.topLogprobs(), request.streamOptions(),
-                request.metadata()
+                request.metadata(), request.tags()
         );
     }
 }

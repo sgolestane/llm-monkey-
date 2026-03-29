@@ -25,7 +25,8 @@ Route requests through a single OpenAI-compatible API to any of these providers:
 - **Virtual Keys** -- Generate API keys (`sk-lm-*`) with per-key model access, budgets, rate limits, and expiration. Keys are SHA-256 hashed in the database.
 - **RBAC** -- Five roles: `PROXY_ADMIN`, `ADMIN_VIEWER`, `ORG_ADMIN`, `TEAM_ADMIN`, `TEAM_MEMBER` with granular permissions.
 - **SSO / OIDC** -- JWT-based authentication alongside virtual keys. Auto-provisions users on first login.
-- **Budget Enforcement** -- Spend tracking and budget limits at the key, user, team, and organization level with configurable reset durations.
+- **Request Tags** -- Pass tags on any request for cost attribution, usage reporting, and per-tag budget enforcement. Query spend grouped by tag via the admin API.
+- **Budget Enforcement** -- Spend tracking and budget limits at the key, user, team, organization, and tag level with configurable reset durations.
 - **Rate Limiting** -- TPM/RPM limits backed by Redis (sliding window) with in-memory fallback.
 - **Response Caching** -- Two-level cache: L1 (Caffeine, in-process) + L2 (Redis, shared). Caches deterministic requests (temperature=0, non-streaming).
 - **Guardrails** -- Pre-request and post-response content filtering: regex patterns, keyword blocking, and PII masking.
@@ -116,6 +117,17 @@ curl http://localhost:4000/v1/models \
 | POST | `/key/update` | Update key settings |
 | POST | `/key/delete` | Revoke a key |
 
+### Tag Budget & Reporting
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/tag/budget/new` | Create a per-tag budget |
+| POST | `/tag/budget/update` | Update a tag budget |
+| POST | `/tag/budget/delete` | Delete a tag budget |
+| GET | `/tag/budget/info?tag=` | Get tag budget details |
+| GET | `/tag/budget/list` | List all tag budgets |
+| GET | `/tag/spend?tag=&period=` | Get spend report for a tag |
+
 ### Team / User / Organization Management
 
 | Method | Path | Description |
@@ -174,6 +186,99 @@ llm-monkey:
     rate-limit-enabled: true
 ```
 
+## Tags
+
+Tags let you categorize and track LLM usage across projects, features, teams, or any custom dimension. Pass tags on any request, then use them for cost attribution, usage reporting, and budget enforcement.
+
+### Passing Tags on Requests
+
+Include a `tags` array in any request body:
+
+```bash
+curl http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer sk-master-1234" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Summarize this report"}],
+    "tags": ["project-alpha", "summarization", "team-data-science"]
+  }'
+```
+
+Tags work on all endpoints: `/v1/chat/completions`, `/v1/completions`, and `/v1/embeddings`.
+
+### Spend Reporting by Tag
+
+Query spend for any tag, optionally filtered by time period (`1h`, `24h`, `7d`, `30d`):
+
+```bash
+# Total spend for a tag
+curl "http://localhost:4000/tag/spend?tag=project-alpha" \
+  -H "Authorization: Bearer sk-master-1234"
+
+# Spend in the last 7 days
+curl "http://localhost:4000/tag/spend?tag=project-alpha&period=7d" \
+  -H "Authorization: Bearer sk-master-1234"
+```
+
+Response includes total spend, request count, total tokens, and spend broken down by model:
+
+```json
+{
+  "tag": "project-alpha",
+  "totalSpend": 12.50,
+  "requestCount": 245,
+  "totalTokens": 1250000,
+  "spendByModel": {
+    "gpt-4": 10.00,
+    "gpt-4o": 2.50
+  },
+  "period": "7d"
+}
+```
+
+### Tag-Based Budget Enforcement
+
+Set a maximum budget for a tag. Once the tag's cumulative spend reaches the limit, further requests with that tag are rejected with a 400 error.
+
+```bash
+# Create a tag budget ($100 max, resets monthly)
+curl -X POST http://localhost:4000/tag/budget/new \
+  -H "Authorization: Bearer sk-master-1234" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tag": "project-alpha",
+    "maxBudget": 100.00,
+    "budgetDuration": "30d"
+  }'
+
+# Check tag budget status
+curl "http://localhost:4000/tag/budget/info?tag=project-alpha" \
+  -H "Authorization: Bearer sk-master-1234"
+
+# Update a tag budget
+curl -X POST http://localhost:4000/tag/budget/update \
+  -H "Authorization: Bearer sk-master-1234" \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "project-alpha", "maxBudget": 200.00}'
+
+# Delete a tag budget
+curl -X POST http://localhost:4000/tag/budget/delete \
+  -H "Authorization: Bearer sk-master-1234" \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "project-alpha"}'
+```
+
+### Tag Metrics (Prometheus)
+
+Tags are automatically tracked in Prometheus metrics:
+
+- `llm_monkey_tag_requests_total{tag, model}` -- request count per tag
+- `llm_monkey_tag_spend_total{tag}` -- cumulative spend per tag
+- `llm_monkey_tag_tokens_total{tag, direction}` -- token count per tag (input/output)
+
+Query in Grafana to build dashboards showing spend by project, team, or feature.
+
 ## Architecture
 
 ```
@@ -217,14 +322,15 @@ src/main/java/ai/llmmonkey/
 
 ### Database Schema
 
-7 Flyway migrations create:
+8 Flyway migrations create:
 - **budgets** -- Budget limits, durations, and reset schedules
 - **organizations** -- Multi-tenant org hierarchy
 - **teams** -- Team grouping within orgs
 - **llm_users** -- Users with roles and SSO mapping
 - **verification_tokens** -- Virtual API keys with scoped access
-- **spend_logs** -- Per-request cost and usage tracking
+- **spend_logs** -- Per-request cost, usage tracking, and tags (GIN-indexed)
 - **audit_logs** -- Admin operation audit trail
+- **tag_budgets** -- Per-tag budget enforcement with spend tracking
 
 ## License
 
