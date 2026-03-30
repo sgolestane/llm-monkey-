@@ -1,5 +1,6 @@
 package ai.llmmonkey.ratelimit;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
@@ -12,6 +13,7 @@ import java.time.Instant;
 
 @Component
 @ConditionalOnProperty(name = "spring.data.redis.host")
+@ConditionalOnBean(ReactiveStringRedisTemplate.class)
 public class RedisRateLimiter implements RateLimiter {
 
     private final ReactiveStringRedisTemplate redisTemplate;
