@@ -1,0 +1,68 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: llm-monkey-test
+  datasource:
+    url: jdbc:h2:mem:llmmonkey_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: true
+    locations: classpath:db/h2migration
+  data:
+    redis:
+      host: ""
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+
+llm-monkey:
+  master-key: "test-master-key-12345"
+  model-list:
+    - model-name: "mock-gpt-4"
+      provider: "mock"
+      params:
+        model: "mock-gpt-4"
+        api-key: "fake-key"
+        api-base: "http://localhost:0"
+    - model-name: "mock-claude"
+      provider: "mock"
+      params:
+        model: "mock-claude"
+        api-key: "fake-key"
+        api-base: "http://localhost:0"
+    - model-name: "mock-embedding"
+      provider: "mock"
+      params:
+        model: "mock-embedding"
+        api-key: "fake-key"
+        api-base: "http://localhost:0"
+  router-settings:
+    routing-strategy: "round-robin"
+    num-retries: 1
+    timeout-seconds: 30
+    allowed-fails: 3
+    cooldown-seconds: 10
+  general-settings:
+    database-enabled: true
+    cache-enabled: false
+    rate-limit-enabled: true
+  k8s-auth:
+    enabled: false

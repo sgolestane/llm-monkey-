@@ -70,6 +70,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
     testImplementation("org.testcontainers:postgresql:1.20.4")
     testImplementation("org.wiremock:wiremock-standalone:3.10.0")
+    testImplementation("com.h2database:h2:2.2.224")
 }
 
 tasks.withType<Test> {
