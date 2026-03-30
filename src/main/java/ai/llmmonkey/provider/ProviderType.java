@@ -7,7 +7,8 @@ public enum ProviderType {
     BEDROCK,
     VERTEX_AI,
     COHERE,
-    OLLAMA;
+    OLLAMA,
+    MOCK;
 
     public static ProviderType fromString(String value) {
         return switch (value.toLowerCase()) {
@@ -18,6 +19,7 @@ public enum ProviderType {
             case "vertex_ai", "vertexai", "google" -> VERTEX_AI;
             case "cohere" -> COHERE;
             case "ollama" -> OLLAMA;
+            case "mock" -> MOCK;
             default -> throw new IllegalArgumentException("Unknown provider: " + value);
         };
     }
