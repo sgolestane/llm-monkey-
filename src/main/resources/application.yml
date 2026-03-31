@@ -1,7 +1,10 @@
 server:
   port: 4000
+  shutdown: graceful
 
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   application:
     name: llm-monkey
   datasource:
@@ -9,6 +12,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:llmmonkey}
     password: ${SPRING_DATASOURCE_PASSWORD:llmmonkey}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 5000
+      idle-timeout: 300000
+      max-lifetime: 600000
   jpa:
     hibernate:
       ddl-auto: validate

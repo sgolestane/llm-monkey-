@@ -31,7 +31,7 @@ public class AuthenticationWebFilter implements WebFilter {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationWebFilter.class);
 
     private static final Set<String> PUBLIC_PATHS = Set.of(
-            "/health", "/health/readiness", "/actuator/prometheus"
+            "/health", "/health/readiness", "/health/liveness", "/actuator/prometheus"
     );
 
     private final VirtualKeyService virtualKeyService;

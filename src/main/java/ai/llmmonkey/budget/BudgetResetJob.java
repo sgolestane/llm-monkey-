@@ -3,6 +3,8 @@ package ai.llmmonkey.budget;
 import ai.llmmonkey.repository.BudgetRepository;
 import ai.llmmonkey.model.BudgetEntity;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,7 @@ public class BudgetResetJob {
     }
 
     @Scheduled(fixedRate = 60_000)
+    @SchedulerLock(name = "budgetResetJob", lockAtLeastFor = "PT30S", lockAtMostFor = "PT5M")
     public void resetBudgets() {
         Instant now = Instant.now();
         List<BudgetEntity> expired = budgetRepository.findByBudgetResetAtBefore(now);

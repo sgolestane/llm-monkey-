@@ -44,6 +44,10 @@ dependencies {
     // Caching
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
+    // Distributed lock for scheduled jobs (HA)
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.2.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.2.0")
+
     // Metrics
     implementation("io.micrometer:micrometer-registry-prometheus")
 
