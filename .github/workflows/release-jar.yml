@@ -1,0 +1,39 @@
+name: Release JAR with SLSA Provenance
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions: read-all
+
+jobs:
+  build:
+    permissions:
+      id-token: write
+      contents: read
+      actions: read
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_gradle_slsa3.yml@v2.1.0
+    with:
+      artifact-list: >-
+        ./build/libs/llm-monkey-GRADLE_VERSION.jar
+      jdk-version: 21
+
+  release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.jar
+            *.intoto.jsonl
+          generate_release_notes: true
