@@ -1,0 +1,11 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: llm-monkey
+  labels:
+    app: llm-monkey
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: llm-monkey
