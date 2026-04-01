@@ -13,31 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: llmmonkey_test
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -52,9 +27,3 @@ jobs:
 
       - name: Build and test
         run: ./gradlew build
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/llmmonkey_test
-          SPRING_DATASOURCE_USERNAME: test
-          SPRING_DATASOURCE_PASSWORD: test
-          SPRING_REDIS_HOST: localhost
-          SPRING_REDIS_PORT: 6379
