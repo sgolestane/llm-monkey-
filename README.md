@@ -334,17 +334,7 @@ src/main/java/ai/llmmonkey/
 
 ## Supply Chain Security
 
-This project uses [SLSA](https://slsa.dev/) (Supply-chain Levels for Software Artifacts) to provide tamper-proof provenance for all release artifacts. Both JAR and container image releases are attested at **SLSA Build Level 3** using the [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator).
-
-### Verifying JAR Releases
-
-Install the [slsa-verifier](https://github.com/slsa-framework/slsa-verifier) and verify a downloaded JAR:
-
-```bash
-slsa-verifier verify-artifact llm-monkey-<version>.jar \
-  --provenance-path llm-monkey-<version>.jar.intoto.jsonl \
-  --source-uri github.com/sgolestane/llm-monkey-
-```
+This project uses [SLSA](https://slsa.dev/) (Supply-chain Levels for Software Artifacts) to provide tamper-proof provenance for container image releases, attested at **SLSA Build Level 3** using the [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator).
 
 ### Verifying Container Images
 
