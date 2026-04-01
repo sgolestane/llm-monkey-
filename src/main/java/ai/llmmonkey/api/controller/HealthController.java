@@ -25,6 +25,14 @@ public class HealthController {
         );
     }
 
+    @GetMapping("/health/liveness")
+    public Map<String, Object> liveness() {
+        return Map.of(
+                "status", "alive",
+                "timestamp", Instant.now().toString()
+        );
+    }
+
     @GetMapping("/health/readiness")
     public Map<String, Object> readiness() {
         var models = router.getAvailableModels();
