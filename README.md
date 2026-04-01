@@ -332,6 +332,17 @@ src/main/java/ai/llmmonkey/
 - **audit_logs** -- Admin operation audit trail
 - **tag_budgets** -- Per-tag budget enforcement with spend tracking
 
+## Supply Chain Security
+
+This project uses [SLSA](https://slsa.dev/) (Supply-chain Levels for Software Artifacts) to provide tamper-proof provenance for container image releases, attested at **SLSA Build Level 3** using the [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator).
+
+### Verifying Container Images
+
+```bash
+slsa-verifier verify-image ghcr.io/sgolestane/llm-monkey-:v<version> \
+  --source-uri github.com/sgolestane/llm-monkey-
+```
+
 ## License
 
 MIT
